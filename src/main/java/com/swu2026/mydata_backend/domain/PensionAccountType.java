@@ -1,4 +1,4 @@
-package com.swu2026.mydata_backend.entity;
+package com.swu2026.mydata_backend.domain;
 
 public enum PensionAccountType {
     PENSION_SAVINGS, // 연금저축

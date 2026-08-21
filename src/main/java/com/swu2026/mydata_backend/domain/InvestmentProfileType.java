@@ -1,4 +1,4 @@
-package com.swu2026.mydata_backend.entity;
+package com.swu2026.mydata_backend.domain;
 
 public enum InvestmentProfileType {
     STABLE, // 안정형
