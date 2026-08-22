@@ -1,5 +1,6 @@
 package com.swu2026.mydata_backend.controller;
 
+import com.swu2026.mydata_backend.dto.BankTransactionResponse;
 import com.swu2026.mydata_backend.dto.NationalPensionResponse;
 import com.swu2026.mydata_backend.dto.PersonalPensionResponse;
 import com.swu2026.mydata_backend.dto.RetirementPensionResponse;
@@ -50,6 +51,13 @@ public class MydataConnectionController {
         return service.getSavingsInvestment(scenario);
     }
 
+    @GetMapping("/bank-transaction")
+    public BankTransactionResponse getBankTransaction(
+        @RequestParam(defaultValue = "success") String scenario
+    ) {
+        return service.getBankTransaction(scenario);
+    }
+
     @PostMapping("/{category}/retry")
     public Object retry(@PathVariable String category) {
         return switch (category) {
@@ -57,6 +65,7 @@ public class MydataConnectionController {
             case "retirement-pension" -> service.retryRetirementPension();
             case "personal-pension" -> service.retryPersonalPension();
             case "savings-investment" -> service.retrySavingsInvestment();
+            case "bank-transaction" -> service.retryBankTransaction();
             default -> throw new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
                 "알 수 없는 category: " + category

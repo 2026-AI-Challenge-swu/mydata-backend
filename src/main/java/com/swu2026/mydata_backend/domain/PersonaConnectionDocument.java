@@ -20,6 +20,7 @@ public class PersonaConnectionDocument {
     private RetirementPension retirementPension;
     private PersonalPension personalPension;
     private SavingsInvestment savingsInvestment;
+    private BankTransaction bankTransaction;
 
     @Getter
     @Builder
@@ -60,5 +61,14 @@ public class PersonaConnectionDocument {
             private String prodName;
             private long balanceAmt;
         }
+    }
+
+    // 은행-004(거래내역) 스펙 기반. 실제로는 거래 목록을 패턴 분석해서 급여/소비를 추정해야 하지만,
+    // 정의서(S1-07~09)에도 계산 방식이 TBD라 이번엔 월급·소비 집계값만 바로 mock으로 둠
+    @Getter
+    @Builder
+    public static class BankTransaction {
+        private long salaryAmt;
+        private long expenseAmt;
     }
 }
