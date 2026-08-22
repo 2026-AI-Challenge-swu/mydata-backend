@@ -61,8 +61,13 @@ public class DataSeeder implements CommandLineRunner {
                             .build(),
                         PersonaConnectionDocument.SavingsInvestment.Account.builder()
                             .accountNum("110-987-654321")
-                            .prodName("주식/ETF")
-                            .balanceAmt(12_000_000)
+                            .prodName("주식")
+                            .balanceAmt(7_000_000)
+                            .build(),
+                        PersonaConnectionDocument.SavingsInvestment.Account.builder()
+                            .accountNum("110-555-112233")
+                            .prodName("ETF")
+                            .balanceAmt(5_000_000)
                             .build()
                     ))
                     .build()
