@@ -17,11 +17,15 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (repository.findByPersonaId(KIM_MINJUN_PERSONA_ID).isPresent()) {
-            return;
-        }
+        // 매번 새로 insert하면 재시작할 때마다 문서가 중복 생성되므로,
+        // 기존 문서가 있으면 그 id를 그대로 물려받아 save()가 insert 대신 update로 동작하게 함(upsert).
+        // 이렇게 해야 코드의 mock 값을 바꾼 뒤 재시작만 해도 DB가 항상 최신 상태로 맞춰짐.
+        String existingId = repository.findByPersonaId(KIM_MINJUN_PERSONA_ID)
+            .map(PersonaConnectionDocument::getId)
+            .orElse(null);
 
         PersonaConnectionDocument kimMinjun = PersonaConnectionDocument.builder()
+            .id(existingId)
             .personaId(KIM_MINJUN_PERSONA_ID)
             .nationalPension(
                 PersonaConnectionDocument.NationalPension.builder()
@@ -57,10 +61,21 @@ public class DataSeeder implements CommandLineRunner {
                             .build(),
                         PersonaConnectionDocument.SavingsInvestment.Account.builder()
                             .accountNum("110-987-654321")
-                            .prodName("주식/ETF")
-                            .balanceAmt(12_000_000)
+                            .prodName("주식")
+                            .balanceAmt(7_000_000)
+                            .build(),
+                        PersonaConnectionDocument.SavingsInvestment.Account.builder()
+                            .accountNum("110-555-112233")
+                            .prodName("ETF")
+                            .balanceAmt(5_000_000)
                             .build()
                     ))
+                    .build()
+            )
+            .bankTransaction(
+                PersonaConnectionDocument.BankTransaction.builder()
+                    .salaryAmt(3_400_000)
+                    .expenseAmt(2_100_000)
                     .build()
             )
             .build();

@@ -1,6 +1,7 @@
 package com.swu2026.mydata_backend.service;
 
 import com.swu2026.mydata_backend.domain.PersonaConnectionDocument;
+import com.swu2026.mydata_backend.dto.BankTransactionResponse;
 import com.swu2026.mydata_backend.dto.NationalPensionResponse;
 import com.swu2026.mydata_backend.dto.PersonalPensionResponse;
 import com.swu2026.mydata_backend.dto.RetirementPensionResponse;
@@ -52,6 +53,13 @@ public class MydataConnectionService {
         return toSavingsInvestmentResponse(loadPersona().getSavingsInvestment());
     }
 
+    public BankTransactionResponse getBankTransaction(String scenario) {
+        if (SCENARIO_FAILURE.equals(scenario)) {
+            throw authFailure();
+        }
+        return toBankTransactionResponse(loadPersona().getBankTransaction());
+    }
+
     public NationalPensionResponse retryNationalPension() {
         throw nationalPensionFailure();
     }
@@ -66,6 +74,10 @@ public class MydataConnectionService {
 
     public SavingsInvestmentResponse retrySavingsInvestment() {
         return getSavingsInvestment("success");
+    }
+
+    public BankTransactionResponse retryBankTransaction() {
+        return getBankTransaction("success");
     }
 
     private PersonaConnectionDocument loadPersona() {
@@ -121,6 +133,13 @@ public class MydataConnectionService {
 
         return SavingsInvestmentResponse.builder()
             .accounts(accounts)
+            .build();
+    }
+
+    private BankTransactionResponse toBankTransactionResponse(PersonaConnectionDocument.BankTransaction source) {
+        return BankTransactionResponse.builder()
+            .salaryAmt(source.getSalaryAmt())
+            .expenseAmt(source.getExpenseAmt())
             .build();
     }
 }
