@@ -69,8 +69,8 @@ public class DataSeeder implements CommandLineRunner {
             )
             .bankTransaction(
                 PersonaConnectionDocument.BankTransaction.builder()
-                    .salaryAmt(3_500_000)
-                    .expenseAmt(2_200_000)
+                    .salaryAmt(3_400_000)
+                    .expenseAmt(2_100_000)
                     .build()
             )
             .build();
