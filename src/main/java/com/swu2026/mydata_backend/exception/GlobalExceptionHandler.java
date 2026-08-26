@@ -20,4 +20,16 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
     }
+
+    @ExceptionHandler(ReportGenerationException.class)
+    public ResponseEntity<ConnectionErrorResponse> handleReportGenerationException(
+        ReportGenerationException exception
+    ) {
+        ConnectionErrorResponse body = ConnectionErrorResponse.builder()
+            .message(exception.getMessage())
+            .retryable(exception.isRetryable())
+            .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
+    }
 }
