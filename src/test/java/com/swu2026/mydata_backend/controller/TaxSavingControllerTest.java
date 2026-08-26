@@ -30,8 +30,8 @@ class TaxSavingControllerTest {
             TaxSavingAnalysisResponse.builder()
                 .totalSalary(52_000_000)
                 .deductionRate(0.165)
-                .currentPersonalPensionAnnualContribution(1_075_000)
-                .currentRetirementPensionAnnualContribution(640_000)
+                .currentPensionSavingsAnnualContribution(1_075_000)
+                .currentPersonalPensionAnnualContribution(640_000)
                 .currentEligibleAmount(1_715_000)
                 .currentDeductionAmount(282_975)
                 .recommendedEligibleAmount(9_000_000)
@@ -43,10 +43,10 @@ class TaxSavingControllerTest {
         String requestBody = """
             {
               "totalSalary": 52000000,
-              "personalPensionAccumAmt": 4300000,
-              "personalPensionIssueDate": "2022-06-01",
-              "retirementPensionBalanceAmt": 3200000,
-              "retirementPensionIssueDate": "2021-03-15"
+              "pensionSavingsAccumAmt": 4300000,
+              "pensionSavingsIssueDate": "2022-06-01",
+              "personalPensionEmployeeAmt": 3200000,
+              "personalPensionIssueDate": "2021-03-15"
             }
             """;
 
