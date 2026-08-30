@@ -12,4 +12,5 @@ public class BankTransactionResponse {
 
     private long salaryAmt;
     private long expenseAmt;
+    private long investmentAmt;
 }
