@@ -140,6 +140,7 @@ public class MydataConnectionService {
         return BankTransactionResponse.builder()
             .salaryAmt(source.getSalaryAmt())
             .expenseAmt(source.getExpenseAmt())
+            .investmentAmt(source.getInvestmentAmt())
             .build();
     }
 }

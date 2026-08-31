@@ -70,5 +70,8 @@ public class PersonaConnectionDocument {
     public static class BankTransaction {
         private long salaryAmt;
         private long expenseAmt;
+        // Long(boxed): 기존에 저장된 문서엔 이 필드가 없어서 역직렬화 시 null이 들어올 수 있음.
+        // long(원시타입)이면 null을 못 받아서 DataSeeder가 기존 문서를 읽는 순간 예외가 남 — 필드 추가 때마다 겪을 문제라 boxed로 둠.
+        private Long investmentAmt;
     }
 }
