@@ -10,17 +10,21 @@ public class TaxSavingAnalysisRequest {
     @NotNull
     private Long totalSalary;
 
+    // 연금저축
     @NotNull
-    private Long personalPensionAccumAmt;
+    private Long pensionSavingsAccumAmt;
+
+    @NotNull
+    private LocalDate pensionSavingsIssueDate;
+
+    private Long pensionSavingsAnnualContribution;
+
+    // 개인연금(IRP)
+    @NotNull
+    private Long personalPensionEmployeeAmt;
 
     @NotNull
     private LocalDate personalPensionIssueDate;
 
-    @NotNull
-    private Long retirementPensionBalanceAmt;
-
-    @NotNull
-    private LocalDate retirementPensionIssueDate;
     private Long personalPensionAnnualContribution;
-    private Long retirementPensionAnnualContribution;
 }

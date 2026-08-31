@@ -10,8 +10,8 @@ public class TaxSavingAnalysisResponse {
     private long totalSalary;
     private double deductionRate;
 
+    private long currentPensionSavingsAnnualContribution;
     private long currentPersonalPensionAnnualContribution;
-    private long currentRetirementPensionAnnualContribution;
     private long currentEligibleAmount;
     private long currentDeductionAmount;
 
