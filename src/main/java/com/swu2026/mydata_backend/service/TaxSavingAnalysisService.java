@@ -2,8 +2,6 @@ package com.swu2026.mydata_backend.service;
 
 import com.swu2026.mydata_backend.dto.TaxSavingAnalysisRequest;
 import com.swu2026.mydata_backend.dto.TaxSavingAnalysisResponse;
-import java.time.LocalDate;
-import java.time.Period;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,16 +17,8 @@ public class TaxSavingAnalysisService {
     private static final double LOW_DEDUCTION_RATE = 0.132;
 
     public TaxSavingAnalysisResponse analyze(TaxSavingAnalysisRequest request) {
-        long pensionSavingsAnnual = resolveAnnualContribution(
-            request.getPensionSavingsAnnualContribution(),
-            request.getPensionSavingsAccumAmt(),
-            request.getPensionSavingsIssueDate()
-        );
-        long personalPensionAnnual = resolveAnnualContribution(
-            request.getPersonalPensionAnnualContribution(),
-            request.getPersonalPensionEmployeeAmt(),
-            request.getPersonalPensionIssueDate()
-        );
+        long pensionSavingsAnnual = request.getPensionSavingsAnnualContribution();
+        long personalPensionAnnual = request.getPersonalPensionAnnualContribution();
 
         double rate = request.getTotalSalary() <= HIGH_RATE_SALARY_THRESHOLD
             ? HIGH_DEDUCTION_RATE
@@ -56,17 +46,5 @@ public class TaxSavingAnalysisService {
     private long eligibleAmount(long pensionSavingsAnnual, long personalPensionAnnual) {
         long eligiblePensionSavings = Math.min(pensionSavingsAnnual, PENSION_SAVINGS_DEDUCTION_LIMIT);
         return Math.min(eligiblePensionSavings + personalPensionAnnual, TOTAL_DEDUCTION_LIMIT);
-    }
-
-    private long resolveAnnualContribution(Long override, long accumulatedAmount, LocalDate issueDate) {
-        if (override != null) {
-            return override;
-        }
-        return accumulatedAmount / elapsedYearsSince(issueDate);
-    }
-
-    private int elapsedYearsSince(LocalDate issueDate) {
-        int years = Period.between(issueDate, LocalDate.now()).getYears();
-        return Math.max(years, 1);
     }
 }

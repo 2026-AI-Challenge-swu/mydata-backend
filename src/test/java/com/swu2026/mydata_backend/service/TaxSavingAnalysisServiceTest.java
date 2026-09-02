@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.swu2026.mydata_backend.dto.TaxSavingAnalysisRequest;
 import com.swu2026.mydata_backend.dto.TaxSavingAnalysisResponse;
-import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 class TaxSavingAnalysisServiceTest {
@@ -12,47 +11,41 @@ class TaxSavingAnalysisServiceTest {
     private final TaxSavingAnalysisService service = new TaxSavingAnalysisService();
 
     @Test
-    void 연간_납입액을_직접_받으면_그대로_사용해_공제액을_계산한다() {
-        TaxSavingAnalysisRequest request = request("2022-06-01", "2021-03-15", 52_000_000);
-        request.setPensionSavingsAnnualContribution(3_000_000L);
-        request.setPersonalPensionAnnualContribution(3_000_000L);
-
-        TaxSavingAnalysisResponse response = service.analyze(request);
-
-        assertThat(response.getCurrentPensionSavingsAnnualContribution()).isEqualTo(3_000_000);
-        assertThat(response.getCurrentPersonalPensionAnnualContribution()).isEqualTo(3_000_000);
-        assertThat(response.getDeductionRate()).isEqualTo(0.165);
-        // eligible = min(3,000,000, 6,000,000) + 3,000,000 = 6,000,000
-        assertThat(response.getCurrentEligibleAmount()).isEqualTo(6_000_000);
-        assertThat(response.getCurrentDeductionAmount()).isEqualTo(990_000);
-        assertThat(response.getRecommendedEligibleAmount()).isEqualTo(9_000_000);
-        assertThat(response.getRecommendedDeductionAmount()).isEqualTo(1_485_000);
-        assertThat(response.getIncreaseAmount()).isEqualTo(495_000);
-    }
-
-    @Test
-    void 연간_납입액을_받지_않으면_누적액을_가입_경과연수로_나눠_계산한다() {
-        LocalDate pensionSavingsIssueDate = LocalDate.now().minusYears(4);
-        LocalDate personalPensionIssueDate = LocalDate.now().minusYears(5);
-
-        TaxSavingAnalysisRequest request = new TaxSavingAnalysisRequest();
-        request.setTotalSalary(52_000_000L);
-        request.setPensionSavingsAccumAmt(4_000_000L);
-        request.setPensionSavingsIssueDate(pensionSavingsIssueDate);
-        request.setPersonalPensionEmployeeAmt(5_000_000L);
-        request.setPersonalPensionIssueDate(personalPensionIssueDate);
+    void 연간_납입액을_받아_그대로_공제액을_계산한다() {
+        TaxSavingAnalysisRequest request = request(52_000_000, 1_000_000, 2_000_000);
 
         TaxSavingAnalysisResponse response = service.analyze(request);
 
         assertThat(response.getCurrentPensionSavingsAnnualContribution()).isEqualTo(1_000_000);
-        assertThat(response.getCurrentPersonalPensionAnnualContribution()).isEqualTo(1_000_000);
+        assertThat(response.getCurrentPersonalPensionAnnualContribution()).isEqualTo(2_000_000);
+        assertThat(response.getDeductionRate()).isEqualTo(0.165);
+        assertThat(response.getCurrentEligibleAmount()).isEqualTo(3_000_000);
+        assertThat(response.getCurrentDeductionAmount()).isEqualTo(495_000);
+        assertThat(response.getRecommendedEligibleAmount()).isEqualTo(9_000_000);
+        assertThat(response.getRecommendedDeductionAmount()).isEqualTo(1_485_000);
+        assertThat(response.getIncreaseAmount()).isEqualTo(990_000);
+    }
+
+    @Test
+    void 연봉_5천만원에_개인연금과_IRP를_각각_연_80만원씩_납입하면_절세효과를_계산한다() {
+        // 개인연금(연금저축) 80만원 + IRP 80만원 = 연 160만원(세액공제 대상 합산액)
+        TaxSavingAnalysisRequest request = request(50_000_000, 800_000, 800_000);
+
+        TaxSavingAnalysisResponse response = service.analyze(request);
+
+        assertThat(response.getCurrentPensionSavingsAnnualContribution()).isEqualTo(800_000);
+        assertThat(response.getCurrentPersonalPensionAnnualContribution()).isEqualTo(800_000);
+        assertThat(response.getDeductionRate()).isEqualTo(0.165);
+        assertThat(response.getCurrentEligibleAmount()).isEqualTo(1_600_000);
+        assertThat(response.getCurrentDeductionAmount()).isEqualTo(264_000);
+        assertThat(response.getRecommendedEligibleAmount()).isEqualTo(9_000_000);
+        assertThat(response.getRecommendedDeductionAmount()).isEqualTo(1_485_000);
+        assertThat(response.getIncreaseAmount()).isEqualTo(1_221_000);
     }
 
     @Test
     void 총급여가_5500만원을_초과하면_공제율_13_2퍼센트를_적용한다() {
-        TaxSavingAnalysisRequest request = request("2022-06-01", "2021-03-15", 60_000_000);
-        request.setPensionSavingsAnnualContribution(6_000_000L);
-        request.setPersonalPensionAnnualContribution(3_000_000L);
+        TaxSavingAnalysisRequest request = request(60_000_000, 0, 9_000_000);
 
         TaxSavingAnalysisResponse response = service.analyze(request);
 
@@ -62,11 +55,20 @@ class TaxSavingAnalysisServiceTest {
     }
 
     @Test
-    void 납입액이_한도를_넘으면_공제_한도까지만_인정한다() {
-        TaxSavingAnalysisRequest request = request("2022-06-01", "2021-03-15", 52_000_000);
-        // 연금저축 800만원(한도 600만원 초과) + IRP 500만원 -> 합산도 900만원 한도로 잘림
-        request.setPensionSavingsAnnualContribution(8_000_000L);
-        request.setPersonalPensionAnnualContribution(5_000_000L);
+    void 연금저축은_단독으로_600만원까지만_인정한다() {
+        // 연금저축에만 900만원을 넣어도 단독 한도(600만원)까지만 인정
+        TaxSavingAnalysisRequest request = request(52_000_000, 9_000_000, 0);
+
+        TaxSavingAnalysisResponse response = service.analyze(request);
+
+        assertThat(response.getCurrentEligibleAmount()).isEqualTo(6_000_000);
+        assertThat(response.getCurrentDeductionAmount()).isEqualTo(990_000);
+    }
+
+    @Test
+    void 합산_납입액이_한도를_넘으면_공제_한도까지만_인정한다() {
+        // 연금저축 600만원(단독 한도까지 인정) + IRP 600만원 = 합산 900만원 한도까지만 인정
+        TaxSavingAnalysisRequest request = request(52_000_000, 6_000_000, 6_000_000);
 
         TaxSavingAnalysisResponse response = service.analyze(request);
 
@@ -75,13 +77,11 @@ class TaxSavingAnalysisServiceTest {
         assertThat(response.getIncreaseAmount()).isEqualTo(0);
     }
 
-    private TaxSavingAnalysisRequest request(String pensionSavingsIssueDate, String personalPensionIssueDate, long totalSalary) {
+    private TaxSavingAnalysisRequest request(long totalSalary, long pensionSavingsAnnual, long personalPensionAnnual) {
         TaxSavingAnalysisRequest request = new TaxSavingAnalysisRequest();
         request.setTotalSalary(totalSalary);
-        request.setPensionSavingsAccumAmt(4_300_000L);
-        request.setPensionSavingsIssueDate(LocalDate.parse(pensionSavingsIssueDate));
-        request.setPersonalPensionEmployeeAmt(3_200_000L);
-        request.setPersonalPensionIssueDate(LocalDate.parse(personalPensionIssueDate));
+        request.setPensionSavingsAnnualContribution(pensionSavingsAnnual);
+        request.setPersonalPensionAnnualContribution(personalPensionAnnual);
         return request;
     }
 }
