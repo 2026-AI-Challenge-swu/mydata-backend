@@ -43,10 +43,8 @@ class TaxSavingControllerTest {
         String requestBody = """
             {
               "totalSalary": 52000000,
-              "pensionSavingsAccumAmt": 4300000,
-              "pensionSavingsIssueDate": "2022-06-01",
-              "personalPensionEmployeeAmt": 3200000,
-              "personalPensionIssueDate": "2021-03-15"
+              "pensionSavingsAnnualContribution": 1075000,
+              "personalPensionAnnualContribution": 640000
             }
             """;
 

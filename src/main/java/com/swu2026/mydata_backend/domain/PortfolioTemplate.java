@@ -13,6 +13,7 @@ public class PortfolioTemplate {
     private String id;
 
     private InvestmentProfileType profileType;
-    private String name;
-    private List<PortfolioComposition> compositions;
+    private String dcDefaultAllocationDescription;
+    private List<String> recommendationReasons;
+    private List<PortfolioAgeBandAllocation> ageBandAllocations;
 }
