@@ -72,7 +72,6 @@ public class RetirementReportService {
             .retirementFundAnalysis(retirementFundAnalysis)
             .recommendedPortfolio(recommendedPortfolio)
             .futureAssetSimulation(futureAssetSimulation)
-            .taxSavingAnalysis(taxSavingAnalysis)
             .aiReport(aiReport)
             .build();
     }
