@@ -14,4 +14,7 @@ public class InvestmentProfileResponse {
     private String officialName;
     private String nickname;
     private String description;
+    private String cardBackground;
+    private String badgeBackground;
+    private String accentColor;
 }

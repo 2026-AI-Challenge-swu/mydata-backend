@@ -31,6 +31,9 @@ public class SurveyResponseService {
             .officialName(type.getOfficialName())
             .nickname(type.getNickname())
             .description(type.getDescription())
+            .cardBackground(type.getCardBackground())
+            .badgeBackground(type.getBadgeBackground())
+            .accentColor(type.getAccentColor())
             .build();
     }
 
