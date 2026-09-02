@@ -1,5 +1,6 @@
 package com.swu2026.mydata_backend.seed;
 
+import com.swu2026.mydata_backend.domain.PensionAccountType;
 import com.swu2026.mydata_backend.domain.PersonaConnectionDocument;
 import com.swu2026.mydata_backend.repository.PersonaConnectionRepository;
 import java.util.List;
@@ -41,15 +42,20 @@ public class DataSeeder implements CommandLineRunner {
                     .issueDate("2021-03-15")
                     .build()
             )
-            .personalPension(
-                PersonaConnectionDocument.PersonalPension.builder()
-                    .accumAmt(4_300_000)
-                    .evalAmt(4_450_000)
-                    .employerAmt(0)
-                    .employeeAmt(4_300_000)
-                    .issueDate("2022-06-01")
-                    .rcvStartDate("2054-01-01")
-                    .build()
+            // 김민준 페르소나는 연금저축 계좌가 없음(IRP만 가입) — 리스트에 IRP 하나만 넣음.
+            // 나중에 연금저축 계좌가 있는 페르소나가 생기면 accountType(PENSION_SAVINGS)으로 추가하면 됨.
+            .personalPensionAccounts(
+                List.of(
+                    PersonaConnectionDocument.PersonalPensionAccount.builder()
+                        .accountType(PensionAccountType.IRP)
+                        .accumAmt(4_300_000)
+                        .evalAmt(4_450_000)
+                        .employerAmt(0)
+                        .employeeAmt(4_300_000)
+                        .issueDate("2022-06-01")
+                        .rcvStartDate("2054-01-01")
+                        .build()
+                )
             )
             .savingsInvestment(
                 PersonaConnectionDocument.SavingsInvestment.builder()

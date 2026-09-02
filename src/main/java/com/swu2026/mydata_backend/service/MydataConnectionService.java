@@ -43,7 +43,7 @@ public class MydataConnectionService {
         if (SCENARIO_FAILURE.equals(scenario)) {
             throw authFailure();
         }
-        return toPersonalPensionResponse(loadPersona().getPersonalPension());
+        return toPersonalPensionResponse(loadPersona().getPersonalPensionAccounts());
     }
 
     public SavingsInvestmentResponse getSavingsInvestment(String scenario) {
@@ -109,14 +109,23 @@ public class MydataConnectionService {
             .build();
     }
 
-    private PersonalPensionResponse toPersonalPensionResponse(PersonaConnectionDocument.PersonalPension source) {
+    private PersonalPensionResponse toPersonalPensionResponse(
+        List<PersonaConnectionDocument.PersonalPensionAccount> source
+    ) {
+        List<PersonalPensionResponse.Account> accounts = source.stream()
+            .map(account -> PersonalPensionResponse.Account.builder()
+                .accountType(account.getAccountType().name())
+                .accumAmt(account.getAccumAmt())
+                .evalAmt(account.getEvalAmt())
+                .employerAmt(account.getEmployerAmt())
+                .employeeAmt(account.getEmployeeAmt())
+                .issueDate(account.getIssueDate())
+                .rcvStartDate(account.getRcvStartDate())
+                .build())
+            .toList();
+
         return PersonalPensionResponse.builder()
-            .accumAmt(source.getAccumAmt())
-            .evalAmt(source.getEvalAmt())
-            .employerAmt(source.getEmployerAmt())
-            .employeeAmt(source.getEmployeeAmt())
-            .issueDate(source.getIssueDate())
-            .rcvStartDate(source.getRcvStartDate())
+            .accounts(accounts)
             .build();
     }
 

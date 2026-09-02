@@ -18,7 +18,7 @@ public class PersonaConnectionDocument {
 
     private NationalPension nationalPension;
     private RetirementPension retirementPension;
-    private PersonalPension personalPension;
+    private List<PersonalPensionAccount> personalPensionAccounts;
     private SavingsInvestment savingsInvestment;
     private BankTransaction bankTransaction;
 
@@ -38,9 +38,12 @@ public class PersonaConnectionDocument {
         private String issueDate;
     }
 
+    // IRP와 연금저축은 세액공제 한도(연금저축 600만원 단독 / 둘 합산 900만원)가 달라서
+    // 계좌 하나가 아니라 리스트로 관리 — 어느 상품유형인지는 accountType으로 구분.
     @Getter
     @Builder
-    public static class PersonalPension {
+    public static class PersonalPensionAccount {
+        private PensionAccountType accountType;
         private long accumAmt;
         private long evalAmt;
         private long employerAmt;
