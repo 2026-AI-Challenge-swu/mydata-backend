@@ -132,7 +132,6 @@ class RetirementReportServiceTest {
         assertThat(response.getRetirementFundAnalysis()).isSameAs(retirementFundAnalysis);
         assertThat(response.getRecommendedPortfolio()).isSameAs(recommendedPortfolio);
         assertThat(response.getFutureAssetSimulation()).isSameAs(futureAssetSimulation);
-        assertThat(response.getTaxSavingAnalysis()).isSameAs(taxSavingAnalysis);
         assertThat(response.getAiReport()).isSameAs(aiReport);
 
         // targetLivingCost 미입력 시 기본값(250만원)이 쓰였는지 검증

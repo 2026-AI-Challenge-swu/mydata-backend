@@ -12,6 +12,5 @@ public class RetirementReportResponse {
     private RetirementFundAnalysisResponse retirementFundAnalysis;
     private PortfolioRecommendationResponse recommendedPortfolio;
     private FutureAssetSimulationResponse futureAssetSimulation;
-    private TaxSavingAnalysisResponse taxSavingAnalysis;
     private ReportResponse aiReport;
 }
