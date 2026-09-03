@@ -1,10 +1,14 @@
 spring:
   mongodb:
-    uri: mongodb+srv://<username>:<password>@<cluster-url>/mydata?retryWrites=true&w=majority
+    uri: ${MONGODB_URI:mongodb+srv://<username>:<password>@<cluster-url>/mydata?retryWrites=true&w=majority}
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 external:
   report-api:
-    base-url: http://localhost:8000
+    base-url: ${REPORT_API_BASE_URL:http://localhost:8000}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ORIGINS:http://localhost:5173}
