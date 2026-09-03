@@ -9,14 +9,12 @@ import static org.mockito.Mockito.verify;
 import com.swu2026.mydata_backend.domain.Gender;
 import com.swu2026.mydata_backend.domain.InvestmentProfileType;
 import com.swu2026.mydata_backend.domain.PensionAccountType;
-import com.swu2026.mydata_backend.dto.AssetPensionStatusResponse;
 import com.swu2026.mydata_backend.dto.FutureAssetSimulationResponse;
 import com.swu2026.mydata_backend.dto.InvestmentProfileResponse;
 import com.swu2026.mydata_backend.dto.MydataSnapshotRequest;
 import com.swu2026.mydata_backend.dto.PortfolioRecommendationResponse;
 import com.swu2026.mydata_backend.dto.ReportRequest;
 import com.swu2026.mydata_backend.dto.ReportResponse;
-import com.swu2026.mydata_backend.dto.RetirementFundAnalysisResponse;
 import com.swu2026.mydata_backend.dto.RetirementReportRequest;
 import com.swu2026.mydata_backend.dto.RetirementReportResponse;
 import com.swu2026.mydata_backend.dto.SurveyAnswerRequest;
@@ -37,11 +35,7 @@ class RetirementReportServiceTest {
     @Mock
     private SurveyResponseService surveyResponseService;
     @Mock
-    private AssetPensionStatusService assetPensionStatusService;
-    @Mock
     private PortfolioRecommendationService portfolioRecommendationService;
-    @Mock
-    private RetirementFundAnalysisService retirementFundAnalysisService;
     @Mock
     private FutureAssetSimulationService futureAssetSimulationService;
     @Mock
@@ -67,12 +61,9 @@ class RetirementReportServiceTest {
 
         MydataSnapshotRequest mydata = mydata();
 
-        AssetPensionStatusResponse assetPensionStatus = AssetPensionStatusResponse.builder()
-            .totalAssets(39_650_000)
-            .expectedMonthlyPension(1_500_000)
-            .build();
-        given(assetPensionStatusService.calculate(mydata)).willReturn(assetPensionStatus);
-
+        // totalAssets = savingsInvestment(20,000,000) + personalPension evalAmt 합(2,050,000+2,400,000)
+        // + retirementPension.evalAmt(3,200,000) = 27,650,000 — RetirementReportService.totalAssetsOf()가
+        // mydata()에서 직접 합산하므로 여기서 실제로 넘어올 값을 그대로 mock 인자로 씀.
         PortfolioRecommendationResponse recommendedPortfolio = PortfolioRecommendationResponse.builder()
             .profileType("STABLE_SEEKING")
             .dcDefaultAllocationDescription("원리금보장 60% + 채권형 40%")
@@ -86,27 +77,17 @@ class RetirementReportServiceTest {
         given(portfolioRecommendationService.recommend(InvestmentProfileType.STABLE_SEEKING, 45, Gender.FEMALE))
             .willReturn(recommendedPortfolio);
 
-        RetirementFundAnalysisResponse retirementFundAnalysis = RetirementFundAnalysisResponse.builder()
-            .targetLivingCost(2_500_000)
-            .expectedMonthlyPension(1_500_000)
-            .monthlyShortfall(1_000_000)
-            .requiredAmountAtRetirement(240_000_000L)
-            .inflationRate(0.025)
-            .retirementPayoutYears(20)
-            .build();
-        given(retirementFundAnalysisService.analyze(2_500_000L, 1_500_000L, 45)).willReturn(retirementFundAnalysis);
-
         FutureAssetSimulationResponse futureAssetSimulation = FutureAssetSimulationResponse.builder()
             .currentAge(45)
             .targetAge(65)
             .points(List.of(
                 FutureAssetSimulationResponse.Point.builder()
-                    .age(45).maintainAmount(39_650_000).plus20Amount(39_650_000).plus40Amount(39_650_000).build(),
+                    .age(45).maintainAmount(27_650_000).plus20Amount(27_650_000).plus40Amount(27_650_000).build(),
                 FutureAssetSimulationResponse.Point.builder()
                     .age(65).maintainAmount(80_000_000).plus20Amount(120_000_000).plus40Amount(150_000_000).build()
             ))
             .build();
-        given(futureAssetSimulationService.simulate(45, 39_650_000L, 0.05)).willReturn(futureAssetSimulation);
+        given(futureAssetSimulationService.simulate(45, 27_650_000L, 0.05)).willReturn(futureAssetSimulation);
 
         TaxSavingAnalysisResponse taxSavingAnalysis = TaxSavingAnalysisResponse.builder()
             .totalSalary(40_800_000).increaseAmount(1_000_000).build();
@@ -128,16 +109,14 @@ class RetirementReportServiceTest {
         RetirementReportResponse response = service.generate(request);
 
         assertThat(response.getInvestmentProfile()).isSameAs(investmentProfile);
-        assertThat(response.getAssetPensionStatus()).isSameAs(assetPensionStatus);
-        assertThat(response.getRetirementFundAnalysis()).isSameAs(retirementFundAnalysis);
         assertThat(response.getRecommendedPortfolio()).isSameAs(recommendedPortfolio);
         assertThat(response.getFutureAssetSimulation()).isSameAs(futureAssetSimulation);
         assertThat(response.getTaxSavingAnalysis()).isSameAs(taxSavingAnalysis);
         assertThat(response.getAiReport()).isSameAs(aiReport);
 
-        // targetLivingCost 미입력 시 기본값(250만원)이 쓰였는지 검증
-        verify(retirementFundAnalysisService).analyze(2_500_000L, 1_500_000L, 45);
-        verify(futureAssetSimulationService).simulate(45, 39_650_000L, 0.05);
+        // totalAssetsOf()가 mydata의 savingsInvestment/personalPension/retirementPension을 직접 합산해
+        // futureAssetSimulationService에 넘기는지 검증
+        verify(futureAssetSimulationService).simulate(45, 27_650_000L, 0.05);
 
         ArgumentCaptor<TaxSavingAnalysisRequest> taxCaptor = ArgumentCaptor.forClass(TaxSavingAnalysisRequest.class);
         verify(taxSavingAnalysisService).analyze(taxCaptor.capture());
@@ -169,7 +148,7 @@ class RetirementReportServiceTest {
         assertThat(plan.getTargetAge()).isEqualTo(65);
         assertThat(plan.getExpectedReturnRate()).isEqualTo(0.05);
         assertThat(plan.getTotalContribution()).isEqualTo(48_000_000L);
-        assertThat(plan.getExpectedProfit()).isEqualTo(32_350_000L);
+        assertThat(plan.getExpectedProfit()).isEqualTo(44_350_000L);
         assertThat(plan.getTaxBenefit()).isEqualTo(1_000_000L);
         assertThat(plan.getExpectedAssetAtRetirement()).isEqualTo(120_000_000L);
 

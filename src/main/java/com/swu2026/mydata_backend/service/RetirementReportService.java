@@ -2,14 +2,12 @@ package com.swu2026.mydata_backend.service;
 
 import com.swu2026.mydata_backend.domain.InvestmentProfileType;
 import com.swu2026.mydata_backend.domain.PensionAccountType;
-import com.swu2026.mydata_backend.dto.AssetPensionStatusResponse;
 import com.swu2026.mydata_backend.dto.FutureAssetSimulationResponse;
 import com.swu2026.mydata_backend.dto.InvestmentProfileResponse;
 import com.swu2026.mydata_backend.dto.MydataSnapshotRequest;
 import com.swu2026.mydata_backend.dto.PortfolioRecommendationResponse;
 import com.swu2026.mydata_backend.dto.ReportRequest;
 import com.swu2026.mydata_backend.dto.ReportResponse;
-import com.swu2026.mydata_backend.dto.RetirementFundAnalysisResponse;
 import com.swu2026.mydata_backend.dto.RetirementReportRequest;
 import com.swu2026.mydata_backend.dto.RetirementReportResponse;
 import com.swu2026.mydata_backend.dto.SurveyAnswerRequest;
@@ -22,15 +20,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RetirementReportService {
 
-    private static final long DEFAULT_TARGET_LIVING_COST = 2_500_000L;
-
     private static final int TARGET_AGE = 65;
     private static final long MONTHLY_CONTRIBUTION_FOR_PLAN = 200_000L;
 
     private final SurveyResponseService surveyResponseService;
-    private final AssetPensionStatusService assetPensionStatusService;
     private final PortfolioRecommendationService portfolioRecommendationService;
-    private final RetirementFundAnalysisService retirementFundAnalysisService;
     private final FutureAssetSimulationService futureAssetSimulationService;
     private final TaxSavingAnalysisService taxSavingAnalysisService;
     private final ReportService reportService;
@@ -41,21 +35,12 @@ public class RetirementReportService {
         InvestmentProfileResponse investmentProfile = surveyResponseService.submit(surveyAnswerRequestOf(request));
         InvestmentProfileType profileType = InvestmentProfileType.valueOf(investmentProfile.getType());
 
-        AssetPensionStatusResponse assetPensionStatus = assetPensionStatusService.calculate(mydata);
-
         PortfolioRecommendationResponse recommendedPortfolio = portfolioRecommendationService.recommend(
             profileType, request.getCurrentAge(), request.getGender()
         );
 
-        long targetLivingCost = request.getTargetLivingCost() != null
-            ? request.getTargetLivingCost()
-            : DEFAULT_TARGET_LIVING_COST;
-        RetirementFundAnalysisResponse retirementFundAnalysis = retirementFundAnalysisService.analyze(
-            targetLivingCost, assetPensionStatus.getExpectedMonthlyPension(), request.getCurrentAge()
-        );
-
         FutureAssetSimulationResponse futureAssetSimulation = futureAssetSimulationService.simulate(
-            request.getCurrentAge(), assetPensionStatus.getTotalAssets(), recommendedPortfolio.getExpectedAnnualReturnRate()
+            request.getCurrentAge(), totalAssetsOf(mydata), recommendedPortfolio.getExpectedAnnualReturnRate()
         );
 
         TaxSavingAnalysisResponse taxSavingAnalysis = taxSavingAnalysisService.analyze(
@@ -68,13 +53,25 @@ public class RetirementReportService {
 
         return RetirementReportResponse.builder()
             .investmentProfile(investmentProfile)
-            .assetPensionStatus(assetPensionStatus)
-            .retirementFundAnalysis(retirementFundAnalysis)
             .recommendedPortfolio(recommendedPortfolio)
             .futureAssetSimulation(futureAssetSimulation)
             .taxSavingAnalysis(taxSavingAnalysis)
             .aiReport(aiReport)
             .build();
+    }
+
+    // 예전엔 AssetPensionStatusService가 이 총자산 계산과 함께 "예상 월 연금"도 계산해서 내려줬는데(evalAmt를
+    // 그냥 240개월로 나누기만 하는 단순 공식 — 프론트의 복리+연간납입 반영 공식과 전혀 다른 결과가 나옴), 그
+    // "예상 월 연금" 쪽은 프론트가 실제로 한 번도 읽지 않는 죽은 필드였음(2026-09-03 감사에서 발견, 정리).
+    // futureAssetSimulation 계산에 필요한 총자산 값만 남기고 나머지는 제거.
+    private long totalAssetsOf(MydataSnapshotRequest mydata) {
+        long savingsTotal = mydata.getSavingsInvestment().getAccounts().stream()
+            .mapToLong(MydataSnapshotRequest.SavingsInvestment.Account::getBalanceAmt)
+            .sum();
+        long personalPensionEvalTotal = mydata.getPersonalPensionAccounts().stream()
+            .mapToLong(MydataSnapshotRequest.PersonalPensionAccount::getEvalAmt)
+            .sum();
+        return savingsTotal + personalPensionEvalTotal + mydata.getRetirementPension().getEvalAmt();
     }
 
     private SurveyAnswerRequest surveyAnswerRequestOf(RetirementReportRequest request) {

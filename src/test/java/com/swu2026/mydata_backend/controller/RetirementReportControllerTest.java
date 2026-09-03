@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.swu2026.mydata_backend.dto.AssetPensionStatusResponse;
 import com.swu2026.mydata_backend.dto.InvestmentProfileResponse;
 import com.swu2026.mydata_backend.dto.RetirementReportResponse;
 import com.swu2026.mydata_backend.service.RetirementReportService;
@@ -35,9 +34,6 @@ class RetirementReportControllerTest {
                     .type("STABLE_SEEKING")
                     .grade(2)
                     .build())
-                .assetPensionStatus(AssetPensionStatusResponse.builder()
-                    .totalAssets(39_650_000)
-                    .build())
                 .build()
         );
 
@@ -46,8 +42,7 @@ class RetirementReportControllerTest {
                 .content(validRequestBody()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.investmentProfile.type").value("STABLE_SEEKING"))
-            .andExpect(jsonPath("$.investmentProfile.grade").value(2))
-            .andExpect(jsonPath("$.assetPensionStatus.totalAssets").value(39_650_000));
+            .andExpect(jsonPath("$.investmentProfile.grade").value(2));
     }
 
     @Test

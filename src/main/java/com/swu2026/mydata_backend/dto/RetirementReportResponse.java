@@ -8,8 +8,6 @@ import lombok.Getter;
 public class RetirementReportResponse {
 
     private InvestmentProfileResponse investmentProfile;
-    private AssetPensionStatusResponse assetPensionStatus;
-    private RetirementFundAnalysisResponse retirementFundAnalysis;
     private PortfolioRecommendationResponse recommendedPortfolio;
     private FutureAssetSimulationResponse futureAssetSimulation;
     private TaxSavingAnalysisResponse taxSavingAnalysis;
