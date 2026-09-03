@@ -2,6 +2,9 @@ package com.swu2026.mydata_backend.service;
 
 import com.swu2026.mydata_backend.domain.PersonaConnectionDocument;
 import com.swu2026.mydata_backend.dto.BankTransactionResponse;
+import com.swu2026.mydata_backend.dto.EmploymentResponse;
+import com.swu2026.mydata_backend.dto.IdentityResponse;
+import com.swu2026.mydata_backend.dto.IncomeResponse;
 import com.swu2026.mydata_backend.dto.NationalPensionResponse;
 import com.swu2026.mydata_backend.dto.PersonalPensionResponse;
 import com.swu2026.mydata_backend.dto.RetirementPensionResponse;
@@ -21,6 +24,27 @@ public class MydataConnectionService {
     private static final String SCENARIO_PARTIAL_FAILURE = "partialFailure";
 
     private final PersonaConnectionRepository repository;
+
+    public IdentityResponse getIdentity(String scenario) {
+        if (SCENARIO_FAILURE.equals(scenario)) {
+            throw authFailure();
+        }
+        return toIdentityResponse(loadPersona().getIdentity());
+    }
+
+    public IncomeResponse getIncome(String scenario) {
+        if (SCENARIO_FAILURE.equals(scenario)) {
+            throw authFailure();
+        }
+        return toIncomeResponse(loadPersona().getIncomeInfo());
+    }
+
+    public EmploymentResponse getEmployment(String scenario) {
+        if (SCENARIO_FAILURE.equals(scenario)) {
+            throw authFailure();
+        }
+        return toEmploymentResponse(loadPersona().getEmploymentInfo());
+    }
 
     public NationalPensionResponse getNationalPension(String scenario) {
         if (SCENARIO_FAILURE.equals(scenario)) {
@@ -60,6 +84,18 @@ public class MydataConnectionService {
         return toBankTransactionResponse(loadPersona().getBankTransaction());
     }
 
+    public IdentityResponse retryIdentity() {
+        return getIdentity("success");
+    }
+
+    public IncomeResponse retryIncome() {
+        return getIncome("success");
+    }
+
+    public EmploymentResponse retryEmployment() {
+        return getEmployment("success");
+    }
+
     public NationalPensionResponse retryNationalPension() {
         throw nationalPensionFailure();
     }
@@ -91,6 +127,26 @@ public class MydataConnectionService {
 
     private MydataConnectionException nationalPensionFailure() {
         return new MydataConnectionException("국민연금공단 연계 실패: 이용기관 등록 심사 미완료", false);
+    }
+
+    private IdentityResponse toIdentityResponse(PersonaConnectionDocument.Identity source) {
+        return IdentityResponse.builder()
+            .name(source.getName())
+            .birthYear(source.getBirthYear())
+            .gender(source.getGender())
+            .build();
+    }
+
+    private IncomeResponse toIncomeResponse(PersonaConnectionDocument.IncomeInfo source) {
+        return IncomeResponse.builder()
+            .annualGrossSalary(source.getAnnualGrossSalary())
+            .build();
+    }
+
+    private EmploymentResponse toEmploymentResponse(PersonaConnectionDocument.EmploymentInfo source) {
+        return EmploymentResponse.builder()
+            .jobLabel(source.getJobLabel())
+            .build();
     }
 
     private NationalPensionResponse toNationalPensionResponse(PersonaConnectionDocument.NationalPension source) {
