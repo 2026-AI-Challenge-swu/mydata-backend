@@ -16,11 +16,41 @@ public class PersonaConnectionDocument {
 
     private String personaId;
 
+    private Identity identity;
+    private IncomeInfo incomeInfo;
+    private EmploymentInfo employmentInfo;
     private NationalPension nationalPension;
     private RetirementPension retirementPension;
     private List<PersonalPensionAccount> personalPensionAccounts;
     private SavingsInvestment savingsInvestment;
     private BankTransaction bankTransaction;
+
+    // 본인인증(PASS 등) 결과 — 실제로는 회원가입 시점에 한 번 받는 값이라 국민연금 등 "동의 후 연동"
+    // 항목들과 데이터 소스 성격은 다르지만(2026-09-03 정리), 이 프로젝트엔 별도 회원가입 플로우가 없어서
+    // 같은 마이데이터 연동 체크리스트 항목으로 편입해 mock 구조를 재사용함.
+    @Getter
+    @Builder
+    public static class Identity {
+        private String name;
+        private int birthYear;
+        private Gender gender;
+    }
+
+    // 소득금액증명원(국세청) — 공공 마이데이터(정부24) 제공 항목. 국민연금과 같은 명분으로 mock.
+    @Getter
+    @Builder
+    public static class IncomeInfo {
+        private long annualGrossSalary;
+    }
+
+    // 건강보험 자격득실확인서/재직증명서(공공 마이데이터) — 재직 여부·사업장명 정도가 실제로 확인 가능한
+    // 범위. "직종(IT·기획)" 같은 세부 카테고리까지는 이 서류들의 표준 필드가 아니라서, jobLabel은 그
+    // 한계를 인지한 채로 페르소나 설계값을 그대로 반환하는 근사 mock임(2026-09-03 결정).
+    @Getter
+    @Builder
+    public static class EmploymentInfo {
+        private String jobLabel;
+    }
 
     @Getter
     @Builder

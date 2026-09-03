@@ -1,5 +1,6 @@
 package com.swu2026.mydata_backend.seed;
 
+import com.swu2026.mydata_backend.domain.Gender;
 import com.swu2026.mydata_backend.domain.PensionAccountType;
 import com.swu2026.mydata_backend.domain.PersonaConnectionDocument;
 import com.swu2026.mydata_backend.repository.PersonaConnectionRepository;
@@ -28,6 +29,23 @@ public class DataSeeder implements CommandLineRunner {
         PersonaConnectionDocument kimMinjun = PersonaConnectionDocument.builder()
             .id(existingId)
             .personaId(KIM_MINJUN_PERSONA_ID)
+            .identity(
+                PersonaConnectionDocument.Identity.builder()
+                    .name("김민준")
+                    .birthYear(1997)
+                    .gender(Gender.MALE)
+                    .build()
+            )
+            .incomeInfo(
+                PersonaConnectionDocument.IncomeInfo.builder()
+                    .annualGrossSalary(48_000_000)
+                    .build()
+            )
+            .employmentInfo(
+                PersonaConnectionDocument.EmploymentInfo.builder()
+                    .jobLabel("직장인 (IT·기획)")
+                    .build()
+            )
             .nationalPension(
                 PersonaConnectionDocument.NationalPension.builder()
                     .estimatedMonthlyAmount(320_000)

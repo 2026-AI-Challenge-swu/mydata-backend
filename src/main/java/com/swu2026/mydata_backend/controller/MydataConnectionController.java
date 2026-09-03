@@ -1,6 +1,9 @@
 package com.swu2026.mydata_backend.controller;
 
 import com.swu2026.mydata_backend.dto.BankTransactionResponse;
+import com.swu2026.mydata_backend.dto.EmploymentResponse;
+import com.swu2026.mydata_backend.dto.IdentityResponse;
+import com.swu2026.mydata_backend.dto.IncomeResponse;
 import com.swu2026.mydata_backend.dto.NationalPensionResponse;
 import com.swu2026.mydata_backend.dto.PersonalPensionResponse;
 import com.swu2026.mydata_backend.dto.RetirementPensionResponse;
@@ -22,6 +25,27 @@ import org.springframework.web.server.ResponseStatusException;
 public class MydataConnectionController {
 
     private final MydataConnectionService service;
+
+    @GetMapping("/identity")
+    public IdentityResponse getIdentity(
+        @RequestParam(defaultValue = "success") String scenario
+    ) {
+        return service.getIdentity(scenario);
+    }
+
+    @GetMapping("/income")
+    public IncomeResponse getIncome(
+        @RequestParam(defaultValue = "success") String scenario
+    ) {
+        return service.getIncome(scenario);
+    }
+
+    @GetMapping("/employment")
+    public EmploymentResponse getEmployment(
+        @RequestParam(defaultValue = "success") String scenario
+    ) {
+        return service.getEmployment(scenario);
+    }
 
     @GetMapping("/national-pension")
     public NationalPensionResponse getNationalPension(
@@ -61,6 +85,9 @@ public class MydataConnectionController {
     @PostMapping("/{category}/retry")
     public Object retry(@PathVariable String category) {
         return switch (category) {
+            case "identity" -> service.retryIdentity();
+            case "income" -> service.retryIncome();
+            case "employment" -> service.retryEmployment();
             case "national-pension" -> service.retryNationalPension();
             case "retirement-pension" -> service.retryRetirementPension();
             case "personal-pension" -> service.retryPersonalPension();
