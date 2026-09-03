@@ -1,0 +1,14 @@
+spring:
+  mongodb:
+    uri: ${MONGODB_URI}
+
+server:
+  port: ${PORT:8080}
+
+external:
+  report-api:
+    base-url: ${REPORT_API_BASE_URL:http://localhost:8000}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ORIGINS:http://localhost:5173}
