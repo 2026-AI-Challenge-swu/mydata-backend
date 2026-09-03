@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class FutureAssetSimulationService {
 
-    private static final int TARGET_AGE = 65;
-    private static final long MONTHLY_PLUS_20 = 200_000L;
+    // RetirementReportService도 이 두 값을 그대로 참조함(2026-09-03: 각자 따로 상수를 갖고 있다가
+    // 하나만 바뀌면 조용히 어긋날 위험이 있어서 통합 — package-private으로 공유).
+    static final int TARGET_AGE = 65;
+    static final long MONTHLY_PLUS_20 = 200_000L;
     private static final long MONTHLY_PLUS_40 = 400_000L;
 
     public FutureAssetSimulationResponse simulate(int currentAge, long currentTotalAssets, double annualReturnRate) {

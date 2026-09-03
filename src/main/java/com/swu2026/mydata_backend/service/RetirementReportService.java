@@ -20,8 +20,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RetirementReportService {
 
-    private static final int TARGET_AGE = 65;
-    private static final long MONTHLY_CONTRIBUTION_FOR_PLAN = 200_000L;
+    private static final long DEFAULT_TARGET_LIVING_COST = 2_500_000L;
+
+    // 목표 나이·월 추가납입액은 FutureAssetSimulationService가 시뮬레이션에 쓰는 값과 반드시 같아야
+    // 이 서비스의 pointAt() 조회가 정확한 포인트를 찾음 — 따로 상수를 두지 않고 그 서비스 것을 그대로 씀.
+    private static final int TARGET_AGE = FutureAssetSimulationService.TARGET_AGE;
+    private static final long MONTHLY_CONTRIBUTION_FOR_PLAN = FutureAssetSimulationService.MONTHLY_PLUS_20;
 
     private final SurveyResponseService surveyResponseService;
     private final PortfolioRecommendationService portfolioRecommendationService;
